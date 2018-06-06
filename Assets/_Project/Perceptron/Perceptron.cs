@@ -17,15 +17,26 @@ public class Perceptron : MonoBehaviour
     [SerializeField]
     private GameObject _npc;
     private List<TrainingSet> _trainingSets = new List<TrainingSet>();
-    private double[] _weights = { 0, 0 };
+    private double[] _weights = { 0, 0 }; // Store the actual learned behaviour.
     private double _bias = 0;
     private double _totalError = 0; 
     #endregion
 
-    void Start ()
+    private void Start ()
     {
         // Need to be randomized from the start.
         InitialiseWeights();
+    }
+
+    private void Update ()
+    {
+        if (Input.GetButtonDown("Cancel"))
+        {
+            // Reset training.
+            InitialiseWeights();
+            _trainingSets.Clear();
+            Debug.Log("Training data has been reset.");
+        }
     }
 
     #region Private Methods
