@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 #region Helper Classes
 [System.Serializable]
@@ -17,15 +19,19 @@ public class Perceptron : MonoBehaviour
     [SerializeField]
     private GameObject _npc;
     private List<TrainingSet> _trainingSets = new List<TrainingSet>();
+    private string _dataPath;
+
     private double[] _weights = { 0, 0 }; // Store the actual learned behaviour.
     private double _bias = 0;
-    private double _totalError = 0; 
+    private double _totalError = 0;
     #endregion
 
+    #region Monobehaviour Methods
     private void Start ()
     {
         // Need to be randomized from the start.
         InitialiseWeights();
+        _dataPath = Application.dataPath + "/weights.txt";
     }
 
     private void Update ()
@@ -37,7 +43,16 @@ public class Perceptron : MonoBehaviour
             _trainingSets.Clear();
             Debug.Log("Training data has been reset.");
         }
-    }
+        else if (Input.GetKeyDown("s"))
+        {
+            SaveWeightsAndBias();
+        }
+        else if (Input.GetKeyDown("l"))
+        {
+            LoadWeightsAndBias();
+        }
+    } 
+    #endregion
 
     #region Private Methods
     double DotProductBias (double[] v1, double[] v2)
@@ -132,5 +147,28 @@ public class Perceptron : MonoBehaviour
         // As more trainingSets get added to the list, Train() will have more data for calculations.
         Train();
     } 
+
+    private void SaveWeightsAndBias ()
+    {
+        StreamWriter streamWriter = File.CreateText(_dataPath);
+        streamWriter.WriteLine(_weights[0] + "," + _weights[1] + "," + _bias);
+        streamWriter.Close();
+        Debug.Log("Saved weights and bias to disk.");
+    }
+
+    private void LoadWeightsAndBias ()
+    {
+        Assert.IsTrue(File.Exists(_dataPath));
+        if (File.Exists(_dataPath))
+        {
+            StreamReader streamReader = File.OpenText(_dataPath);
+            string line = streamReader.ReadLine();
+            string[] words = line.Split(',');
+            _weights[0] = System.Convert.ToDouble(words[0]);
+            _weights[1] = System.Convert.ToDouble(words[1]);
+            _bias = System.Convert.ToDouble(words[2]);
+            Debug.Log("Loaded weights and bias to disk.");
+        }
+    }
     #endregion
 }
